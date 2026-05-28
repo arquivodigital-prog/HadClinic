@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Had Clinic — Painel do Médico</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #f5f3ef;
+      --bg2:        #eeebe4;
+      --surface:    #ffffff;
+      --border:     #ddd9d0;
+      --accent:     #1a4d3a;
+      --accent2:    #2e7d5e;
+      --accent3:    #c8f0de;
+      --gold:       #b5882a;
+      --gold-light: #fdf3dc;
+      --red:        #c0392b;
+      --red-light:  #fdecea;
+      --blue:       #1e4e8c;
+      --blue-light: #e8f0fb;
+      --purple:     #5c3d8f;
+      --purple-light:#f0ebfb;
+      --text:       #1a1a18;
+      --muted:      #7a7568;
+      --muted2:     #b0aa9e;
+      --shadow:     rgba(0,0,0,.07);
+      --shadow2:    rgba(0,0,0,.13);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── TOP BAR ─── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 36px;
+      height: 60px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.2);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: #fff;
+      border-radius: 8px;
+      display: grid; place-items: center;
+    }
+    .logo-mark svg { width: 20px; height: 20px; }
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700; font-size: 1.15rem;
+      color: #fff; letter-spacing: .02em;
+    }
+    .logo-text span { color: #7dd3b0; }
+    .topbar-center {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .72rem; color: rgba(255,255,255,.55);
+      letter-spacing: .08em;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 18px; }
+    .topbar-date {
+      font-size: .78rem; color: rgba(255,255,255,.65);
+    }
+    .avatar {
+      width: 34px; height: 34px;
+      background: var(--accent2);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-weight: 600; font-size: .8rem; color: #fff;
+      border: 2px solid rgba(255,255,255,.3);
+      cursor: pointer;
+    }
+    .btn-logout {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: .75rem; color: rgba(255,255,255,.8);
+      cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;
+      transition: background .2s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,.2); }
+
+    /* ─── HERO ─── */
+    .hero {
+      background: linear-gradient(135deg, var(--accent) 0%, #0f3528 100%);
+      padding: 52px 48px 44px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 320px; height: 320px;
+      border: 60px solid rgba(255,255,255,.04);
+      border-radius: 50%;
+    }
+    .hero::after {
+      content: '';
+      position: absolute; bottom: -80px; right: 180px;
+      width: 200px; height: 200px;
+      border: 40px solid rgba(255,255,255,.03);
+      border-radius: 50%;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: .7rem; font-weight: 500;
+      color: #a0dfc4; letter-spacing: .07em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero-tag::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: #4de8a0;
+      border-radius: 50%;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .5; transform: scale(.7); }
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      color: #fff; font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+    .hero h1 em { color: #7dd3b0; font-style: normal; }
+    .hero p {
+      font-size: .9rem; color: rgba(255,255,255,.6);
+      max-width: 480px; line-height: 1.7;
+    }
+    .hero-stats {
+      display: flex; gap: 40px; margin-top: 36px;
+    }
+    .hstat { border-left: 2px solid rgba(255,255,255,.15); padding-left: 16px; }
+    .hstat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; font-weight: 700; color: #7dd3b0;
+      line-height: 1;
+    }
+    .hstat-label { font-size: .7rem; color: rgba(255,255,255,.45); margin-top: 4px; letter-spacing: .06em; text-transform: uppercase; }
+
+    /* ─── MAIN LAYOUT ─── */
+    .main { max-width: 1280px; margin: 0 auto; padding: 40px 36px 80px; }
+
+    /* ─── SECTION HEADING ─── */
+    .sec-head {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .sec-line {
+      width: 4px; height: 22px;
+      border-radius: 2px;
+      background: var(--accent2);
+    }
+    .sec-head h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem; font-weight: 700;
+      color: var(--text);
+    }
+    .sec-head .badge {
+      font-size: .65rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      background: var(--accent3);
+      color: var(--accent);
+      border-radius: 20px; padding: 3px 9px;
+    }
+
+    /* ─── QUICK ACTIONS ─── */
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 48px;
+    }
+    .qa-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 18px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: flex; flex-direction: column; align-items: flex-start;
+      gap: 12px;
+      transition: transform .18s, box-shadow .18s, border-color .18s;
+      position: relative; overflow: hidden;
+    }
+    .qa-card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 60%, rgba(0,0,0,.02));
+    }
+    .qa-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px var(--shadow2);
+    }
+    .qa-card:hover { border-color: var(--border); }
+    .qa-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .qa-icon svg { width: 20px; height: 20px; }
+    .qa-label {
+      font-size: .82rem; font-weight: 600;
+      line-height: 1.3;
+    }
+    .qa-sub {
+      font-size: .7rem; color: var(--muted);
+      line-height: 1.5;
+    }
+    .qa-arrow {
+      margin-top: auto;
+      font-size: .7rem; color: var(--muted2);
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    /* colour variants */
+    .c-green .qa-icon { background: var(--accent3); color: var(--accent); }
+    .c-green:hover { border-color: var(--accent2); }
+
+    .c-gold .qa-icon { background: var(--gold-light); color: var(--gold); }
+    .c-gold:hover { border-color: var(--gold); }
+
+    .c-red .qa-icon { background: var(--red-light); color: var(--red); }
+    .c-red:hover { border-color: var(--red); }
+
+    .c-blue .qa-icon { background: var(--blue-light); color: var(--blue); }
+    .c-blue:hover { border-color: var(--blue); }
+
+    .c-purple .qa-icon { background: var(--purple-light); color: var(--purple); }
+    .c-purple:hover { border-color: var(--purple); }
+
+    .c-teal .qa-icon { background: #e0f5f0; color: #1a6b58; }
+    .c-teal:hover { border-color: #1a6b58; }
+
+    .c-orange .qa-icon { background: #fef0e6; color: #c0621a; }
+    .c-orange:hover { border-color: #c0621a; }
+
+    .c-slate .qa-icon { background: #edf0f5; color: #2c4a72; }
+    .c-slate:hover { border-color: #2c4a72; }
+
+    /* ─── FORMS GRID (big cards) ─── */
+    .forms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 48px;
+    }
+    .form-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      text-decoration: none; color: inherit;
+      display: flex; flex-direction: column;
+      transition: transform .18s, box-shadow .2s;
+    }
+    .form-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 36px var(--shadow2);
+    }
+    .form-card-top {
+      padding: 24px 22px 18px;
+      display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .form-card-icon {
+      width: 50px; height: 50px;
+      border-radius: 12px;
+      display: grid; place-items: center;
+    }
+    .form-card-icon svg { width: 24px; height: 24px; }
+    .form-card-badge {
+      font-size: .6rem; font-weight: 600;
+      letter-spacing: .07em; text-transform: uppercase;
+      padding: 4px 8px; border-radius: 20px;
+    }
+    .form-card-body { padding: 0 22px 20px; }
+    .form-card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem; font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .form-card-desc {
+      font-size: .78rem; color: var(--muted);
+      line-height: 1.6;
+    }
+    .form-card-footer {
+      margin-top: auto;
+      padding: 14px 22px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .form-card-footer span {
+      font-size: .72rem; color: var(--muted2);
+    }
+    .form-card-btn {
+      font-size: .72rem; font-weight: 600;
+      padding: 6px 14px; border-radius: 6px;
+      border: none; cursor: pointer;
+      font-family: 'IBM Plex Sans', sans-serif;
+      transition: filter .15s;
+    }
+    .form-card-btn:hover { filter: brightness(.9); }
+
+    /* ─── TWO-COL: AGENDA + NOTÍCIAS ─── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    .panel-box {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .panel-box-head {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-box-head h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: .95rem; font-weight: 700;
+    }
+    .panel-box-head a {
+      font-size: .72rem; color: var(--accent2);
+      text-decoration: none; font-weight: 500;
+    }
+    .agenda-list { padding: 8px 0; }
+    .agenda-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 22px;
+      border-bottom: 1px solid var(--bg2);
+      text-decoration: none; color: inherit;
+      transition: background .15s;
+      cursor: pointer;
+    }
+    .agenda-item:last-child { border-bottom: none; }
+    .agenda-item:hover { background: var(--bg); }
+    .agenda-time {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .72rem; color: var(--muted);
+      min-width: 44px;
+    }
+    .agenda-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%; flex-shrink: 0;
+    }
+    .agenda-info { flex: 1; }
+    .agenda-name { font-size: .82rem; font-weight: 500; }
+    .agenda-type { font-size: .7rem; color: var(--muted); margin-top: 1px; }
+    .agenda-status {
+      font-size: .65rem; font-weight: 600;
+      padding: 3px 8px; border-radius: 20px;
+      letter-spacing: .04em;
+    }
+
+    .news-list { padding: 8px 0; }
+    .news-item {
+      padding: 12px 22px;
+      border-bottom: 1px solid var(--bg2);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .news-item:last-child { border-bottom: none; }
+    .news-item:hover { background: var(--bg); }
+    .news-cat {
+      font-size: .62rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--accent2); margin-bottom: 4px;
+    }
+    .news-title { font-size: .8rem; font-weight: 500; line-height: 1.4; }
+    .news-date { font-size: .68rem; color: var(--muted2); margin-top: 4px; }
+
+    /* ─── DOCUMENTOS RECENTES ─── */
+    .doc-table {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 48px;
+    }
+    .doc-table-head {
+      padding: 18px 24px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .doc-table-head h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: .95rem; font-weight: 700;
+    }
+    .doc-search {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+    }
+    .doc-search svg { width: 13px; height: 13px; color: var(--muted2); }
+    .doc-search input {
+      border: none; background: transparent;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .78rem; color: var(--text);
+      outline: none; width: 160px;
+    }
+    .doc-search input::placeholder { color: var(--muted2); }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: var(--bg); }
+    th {
+      text-align: left;
+      font-size: .68rem; font-weight: 600;
+      letter-spacing: .07em; text-transform: uppercase;
+      color: var(--muted); padding: 10px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 13px 24px;
+      font-size: .8rem;
+      border-bottom: 1px solid var(--bg2);
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background .12s; cursor: pointer; }
+    tbody tr:hover { background: var(--bg); }
+    .td-doc { display: flex; align-items: center; gap: 10px; }
+    .td-doc-icon {
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .td-doc-icon svg { width: 15px; height: 15px; }
+    .td-status {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: .68rem; font-weight: 600;
+      padding: 3px 9px; border-radius: 20px;
+    }
+    .td-status::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      background: var(--accent);
+      padding: 24px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: .9rem; color: rgba(255,255,255,.6);
+    }
+    .footer-brand strong { color: #7dd3b0; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a {
+      font-size: .72rem; color: rgba(255,255,255,.4);
+      text-decoration: none; transition: color .2s;
+    }
+    .footer-links a:hover { color: rgba(255,255,255,.8); }
+
+    /* ─── MODAL ─── */
+    .modal-bg {
+      display: none;
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: 18px;
+      width: 90%; max-width: 480px;
+      padding: 36px 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      animation: popIn .25s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes popIn {
+      from { opacity:0; transform:scale(.93); }
+      to   { opacity:1; transform:scale(1); }
+    }
+    .modal h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem; margin-bottom: 8px;
+    }
+    .modal p { font-size: .83rem; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-cancel {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 20px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .82rem; cursor: pointer;
+    }
+    .modal-ok {
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 8px; padding: 9px 20px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: .82rem; cursor: pointer; font-weight: 600;
+    }
+
+    @media (max-width: 860px) {
+      .two-col { grid-template-columns: 1fr; }
+      .hero-stats { flex-wrap: wrap; gap: 24px; }
+      .hero, .main { padding-left: 20px; padding-right: 20px; }
+      .topbar { padding: 0 16px; }
+      .topbar-center { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOP BAR ── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1a4d3a" stroke-width="2.2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <span class="logo-text">Had <span>Clinic</span></span>
+  </div>
+  <div class="topbar-center">SISTEMA DE GESTÃO CLÍNICA · v2.4.1</div>
+  <div class="topbar-right">
+    <span class="topbar-date" id="topDate"></span>
+    <div class="avatar" title="Dr. Afonso Freitas">AF</div>
+    <button class="btn-logout" onclick="window.location.href='/login.html'">Sair</button>
+  </div>
+</header>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-tag">Área Clínica Ativa</div>
+  <h1>Bom dia, <em>Dr. Afonso Freitas</em></h1>
+  <p>Painel centralizado de gestão clínica. Aceda a formulários, declarações, histórico de pacientes e ferramentas administrativas.</p>
+  <div class="hero-stats">
+    <div class="hstat">
+      <div class="hstat-num" id="statConsultas">—</div>
+      <div class="hstat-label">Consultas Hoje</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-num">3</div>
+      <div class="hstat-label">Docs Pendentes</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-num">12</div>
+      <div class="hstat-label">Pacientes este mês</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-num">↑ 98%</div>
+      <div class="hstat-label">Taxa de Presenças</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- ACÇÕES RÁPIDAS -->
+  <div class="sec-head">
+    <div class="sec-line"></div>
+    <h2>Acções Rápidas</h2>
+    <span class="badge">acesso directo</span>
+  </div>
+  <div class="quick-grid">
+
+    <a class="qa-card c-green" href="/medicformulaterier.htm">
+      <div class="qa-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      </div>
+      <div>
+        <div class="qa-label">Formulários Médicos</div>
+        <div class="qa-sub">Todos os formulários clínicos e administrativos</div>
+      </div>
+      <div class="qa-arrow">Abrir <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+    <a class="qa-card c-blue" href="/declaracoes/presenca.htm">
+      <div class="qa-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+      </div>
+      <div>
+        <div class="qa-label">Declaração de Presença</div>
+        <div class="qa-sub">Emitir comprovativo de consulta para paciente</div>
+      </div>
+      <div class="qa-arrow">Emitir <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+    <a class="qa-card c-gold" href="/receitas/nova.htm">
+      <div class="qa-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <div>
+        <div class="qa-label">Nova Receita</div>
+        <div class="qa-sub">Prescrição medicamentosa electrónica</div>
+      </div>
+      <div class="qa-arrow">Prescrever <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+    <a class="qa-card c-teal" href="/pacientes/novo.htm">
+      <div class="qa-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+      </div>
+      <div>
+        <div class="qa-label">Novo Paciente</div>
+        <div class="qa-sub">Registo de ficha clínica</div>
+      </div>
+      <div class="qa-arrow">Registar <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+    <a class="qa-card c-red" href="/urgencias/triagem.htm">
+      <div class="qa-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div>
+        <div class="qa-label">Urgência / Triagem</div>
+        <div class="qa-sub">Registo de episódio de urgência</div>
+      </div>
+      <div class="qa-arrow">Aceder <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+    <a class="qa-card c-purple" href="/exames/pedido.htm">
+      <div class="qa-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </div>
+      <div>
+        <div class="qa-label">Pedido de Exames</div>
+        <div class="qa-sub">MCDTs, análises, imagiologia</div>
+      </div>
+      <div class="qa-arrow">Pedir <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+    <a class="qa-card c-orange" href="/agenda/nova-consulta.htm">
+      <div class="qa-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div>
+        <div class="qa-label">Marcar Consulta</div>
+        <div class="qa-sub">Agendar nova consulta ou retorno</div>
+      </div>
+      <div class="qa-arrow">Agendar <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+    <a class="qa-card c-slate" href="/relatorios/clinico.htm">
+      <div class="qa-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+      <div>
+        <div class="qa-label">Relatório Clínico</div>
+        <div class="qa-sub">Gerar relatório médico detalhado</div>
+      </div>
+      <div class="qa-arrow">Gerar <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+
+  </div>
+
+  <!-- FORMULÁRIOS & DECLARAÇÕES -->
+  <div class="sec-head">
+    <div class="sec-line" style="background:#b5882a"></div>
+    <h2>Formulários & Declarações</h2>
+    <span class="badge" style="background:var(--gold-light);color:var(--gold)">documentação clínica</span>
+  </div>
+  <div class="forms-grid">
+
+    <!-- FORMULÁRIO MÉDICO PRINCIPAL -->
+    <a class="form-card" href="/medicformulaterier.htm">
+      <div class="form-card-top">
+        <div class="form-card-icon" style="background:var(--accent3);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+        </div>
+        <span class="form-card-badge" style="background:var(--accent3);color:var(--accent);">Principal</span>
+      </div>
+      <div class="form-card-body">
+        <div class="form-card-title">Formulário Médico Geral</div>
+        <div class="form-card-desc">Registo completo de anamnese, diagnóstico, plano terapêutico e observações clínicas do episódio.</div>
+      </div>
+      <div class="form-card-footer">
+        <span>Formulário principal</span>
+        <button class="form-card-btn" style="background:var(--accent);color:#fff;">Abrir</button>
+      </div>
+    </a>
+
+    <!-- DECLARAÇÃO DE PRESENÇA -->
+    <a class="form-card" href="/declaracoes/presenca.htm">
+      <div class="form-card-top">
+        <div class="form-card-icon" style="background:var(--blue-light);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+        </div>
+        <span class="form-card-badge" style="background:var(--blue-light);color:var(--blue);">Declaração</span>
+      </div>
+      <div class="form-card-body">
+        <div class="form-card-title">Declaração de Presença</div>
+        <div class="form-card-desc">Comprovativo oficial de comparência do doente à consulta médica, com data, hora e CRM do médico.</div>
+      </div>
+      <div class="form-card-footer">
+        <span>Emissão imediata</span>
+        <button class="form-card-btn" style="background:var(--blue);color:#fff;">Emitir</button>
+      </div>
+    </a>
+
+    <!-- BAIXA MÉDICA -->
+    <a class="form-card" href="/declaracoes/baixa-medica.htm">
+      <div class="form-card-top">
+        <div class="form-card-icon" style="background:var(--red-light);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+        </div>
+        <span class="form-card-badge" style="background:var(--red-light);color:var(--red);">Incapacidade</span>
+      </div>
+      <div class="form-card-body">
+        <div class="form-card-title">Baixa Médica</div>
+        <div class="form-card-desc">Certificado de incapacidade temporária para trabalho (CIT), válido para entidade patronal e Segurança Social.</div>
+      </div>
+      <div class="form-card-footer">
+        <span>CIT / SNS</span>
+        <button class="form-card-btn" style="background:var(--red);color:#fff;">Emitir</button>
+      </div>
+    </a>
+
+    <!-- RECEITA MÉDICA -->
+    <a class="form-card" href="/receitas/nova.htm">
+      <div class="form-card-top">
+        <div class="form-card-icon" style="background:var(--gold-light);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <span class="form-card-badge" style="background:var(--gold-light);color:var(--gold);">Prescrição</span>
+      </div>
+      <div class="form-card-body">
+        <div class="form-card-title">Receita Médica Electrónica</div>
+        <div class="form-card-desc">Prescrição de medicamentos via Receita Sem Papel (RSP), integrada com plataforma SPMS / SNS.</div>
+      </div>
+      <div class="form-card-footer">
+        <span>RSP · SPMS</span>
+        <button class="form-card-btn" style="background:var(--gold);color:#fff;">Prescrever</button>
+      </div>
+    </a>
+
+    <!-- PEDIDO DE EXAMES -->
+    <a class="form-card" href="/exames/pedido.htm">
+      <div class="form-card-top">
+        <div class="form-card-icon" style="background:var(--purple-light);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
+        </div>
+        <span class="form-card-badge" style="background:var(--purple-light);color:var(--purple);">MCDTs</span>
+      </div>
+      <div class="form-card-body">
+        <div class="form-card-title">Pedido de Exames</div>
+        <div class="form-card-desc">Requisição de meios complementares de diagnóstico: análises clínicas, imagiologia, anatomia patológica.</div>
+      </div>
+      <div class="form-card-footer">
+        <span>Laboratório · Imagem</span>
+        <button class="form-card-btn" style="background:var(--purple);color:#fff;">Requisitar</button>
+      </div>
+    </a>
+
+    <!-- RELATÓRIO CLÍNICO -->
+    <a class="form-card" href="/relatorios/clinico.htm">
+      <div class="form-card-top">
+        <div class="form-card-icon" style="background:#e0f5f0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1a6b58" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <span class="form-card-badge" style="background:#e0f5f0;color:#1a6b58;">Relatório</span>
+      </div>
+      <div class="form-card-body">
+        <div class="form-card-title">Relatório Médico</div>
+        <div class="form-card-desc">Relatório clínico detalhado para juntar a processos de seguros, subsídios ou referenciação hospitalar.</div>
+      </div>
+      <div class="form-card-footer">
+        <span>Seguros · SNS</span>
+        <button class="form-card-btn" style="background:#1a6b58;color:#fff;">Redigir</button>
+      </div>
+    </a>
+
+    <!-- REFERENCIAÇÃO -->
+    <a class="form-card" href="/referenciacao/consulta-externa.htm">
+      <div class="form-card-top">
+        <div class="form-card-icon" style="background:#fef0e6;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#c0621a" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </div>
+        <span class="form-card-badge" style="background:#fef0e6;color:#c0621a;">Referenciação</span>
+      </div>
+      <div class="form-card-body">
+        <div class="form-card-title">Referenciação / SCRCE</div>
+        <div class="form-card-desc">Referenciação para consulta externa especializada, INEM ou transferência inter-hospitalar via SCRCE.</div>
+      </div>
+      <div class="form-card-footer">
+        <span>SCRCE · Hospital</span>
+        <button class="form-card-btn" style="background:#c0621a;color:#fff;">Referenciar</button>
+      </div>
+    </a>
+
+    <!-- CONSENTIMENTO INFORMADO -->
+    <a class="form-card" href="/declaracoes/consentimento.htm">
+      <div class="form-card-top">
+        <div class="form-card-icon" style="background:#edf0f5;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2c4a72" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <span class="form-card-badge" style="background:#edf0f5;color:#2c4a72;">Legal</span>
+      </div>
+      <div class="form-card-body">
+        <div class="form-card-title">Consentimento Informado</div>
+        <div class="form-card-desc">Declaração de consentimento esclarecido para procedimentos, cirurgias ou tratamentos invasivos.</div>
+      </div>
+      <div class="form-card-footer">
+        <span>Obrigatório por lei</span>
+        <button class="form-card-btn" style="background:#2c4a72;color:#fff;">Gerar</button>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- AGENDA + AVISOS -->
+  <div class="sec-head">
+    <div class="sec-line" style="background:var(--blue)"></div>
+    <h2>Agenda de Hoje & Comunicados</h2>
+  </div>
+  <div class="two-col">
+
+    <div class="panel-box">
+      <div class="panel-box-head">
+        <h3>Consultas de Hoje</h3>
+        <a href="/agenda/index.htm">Ver agenda completa →</a>
+      </div>
+      <div class="agenda-list">
+        <div class="agenda-item"><span class="agenda-time">09:00</span><div class="agenda-dot" style="background:#2e7d5e"></div><div class="agenda-info"><div class="agenda-name">Maria Oliveira</div><div class="agenda-type">Consulta de seguimento</div></div><span class="agenda-status" style="background:#e0f5f0;color:#1a6b58;">Presente</span></div>
+        <div class="agenda-item"><span class="agenda-time">09:30</span><div class="agenda-dot" style="background:#2e7d5e"></div><div class="agenda-info"><div class="agenda-name">João Ferreira</div><div class="agenda-type">Primeira consulta</div></div><span class="agenda-status" style="background:#e0f5f0;color:#1a6b58;">Presente</span></div>
+        <div class="agenda-item"><span class="agenda-time">10:15</span><div class="agenda-dot" style="background:#b5882a"></div><div class="agenda-info"><div class="agenda-name">Ana Rodrigues</div><div class="agenda-type">Resultado de exames</div></div><span class="agenda-status" style="background:#fdf3dc;color:#b5882a;">Em espera</span></div>
+        <div class="agenda-item"><span class="agenda-time">11:00</span><div class="agenda-dot" style="background:#1e4e8c"></div><div class="agenda-info"><div class="agenda-name">Carlos Mendes</div><div class="agenda-type">Consulta de rotina</div></div><span class="agenda-status" style="background:#e8f0fb;color:#1e4e8c;">Agendado</span></div>
+        <div class="agenda-item"><span class="agenda-time">14:30</span><div class="agenda-dot" style="background:#1e4e8c"></div><div class="agenda-info"><div class="agenda-name">Beatriz Santos</div><div class="agenda-type">Renovação receita</div></div><span class="agenda-status" style="background:#e8f0fb;color:#1e4e8c;">Agendado</span></div>
+        <div class="agenda-item"><span class="agenda-time">15:00</span><div class="agenda-dot" style="background:#c0392b"></div><div class="agenda-info"><div class="agenda-name">Rui Pereira</div><div class="agenda-type">Urgência</div></div><span class="agenda-status" style="background:#fdecea;color:#c0392b;">Urgente</span></div>
+      </div>
+    </div>
+
+    <div class="panel-box">
+      <div class="panel-box-head">
+        <h3>Avisos & Comunicados</h3>
+        <a href="/avisos/index.htm">Ver todos →</a>
+      </div>
+      <div class="news-list">
+        <div class="news-item"><div class="news-cat">Clínica</div><div class="news-title">Actualização do protocolo de prescrição de antibióticos — nova circular normativa</div><div class="news-date">28 Mai 2026</div></div>
+        <div class="news-item"><div class="news-cat">Sistema</div><div class="news-title">Manutenção programada do servidor às 23:00 — acesso interrompido por 20 min</div><div class="news-date">27 Mai 2026</div></div>
+        <div class="news-item"><div class="news-cat">Administrativo</div><div class="news-title">Submissão de relatórios mensais com prazo a 31 de Maio</div><div class="news-date">26 Mai 2026</div></div>
+        <div class="news-item"><div class="news-cat">Formação</div><div class="news-title">Webinar obrigatório: "Gestão de dados clínicos RGPD" — 3 Jun às 18h00</div><div class="news-date">25 Mai 2026</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DOCUMENTOS RECENTES -->
+  <div class="sec-head">
+    <div class="sec-line" style="background:var(--purple)"></div>
+    <h2>Documentos Recentes</h2>
+    <span class="badge" style="background:var(--purple-light);color:var(--purple)">histórico</span>
+  </div>
+  <div class="doc-table">
+    <div class="doc-table-head">
+      <h3>Últimos Documentos Emitidos</h3>
+      <div class="doc-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Pesquisar documento…" id="docSearch"/>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Paciente</th>
+          <th>Tipo</th>
+          <th>Data</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="docBody">
+        <tr>
+          <td><div class="td-doc"><div class="td-doc-icon" style="background:var(--blue-light);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span>Declaração de Presença</span></div></td>
+          <td>Maria Oliveira</td><td>Declaração</td><td>28/05/2026</td>
+          <td><span class="td-status" style="background:var(--accent3);color:var(--accent);">Emitido</span></td>
+          <td><a href="#" style="font-size:.72rem;color:var(--accent2);text-decoration:none;">Download</a></td>
+        </tr>
+        <tr>
+          <td><div class="td-doc"><div class="td-doc-icon" style="background:var(--gold-light);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span>Receita Electrónica</span></div></td>
+          <td>João Ferreira</td><td>Prescrição</td><td>28/05/2026</td>
+          <td><span class="td-status" style="background:var(--accent3);color:var(--accent);">Emitido</span></td>
+          <td><a href="#" style="font-size:.72rem;color:var(--accent2);text-decoration:none;">Download</a></td>
+        </tr>
+        <tr>
+          <td><div class="td-doc"><div class="td-doc-icon" style="background:var(--red-light);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><span>Baixa Médica</span></div></td>
+          <td>Carlos Mendes</td><td>CIT</td><td>26/05/2026</td>
+          <td><span class="td-status" style="background:#fdf3dc;color:var(--gold);">Pendente</span></td>
+          <td><a href="#" style="font-size:.72rem;color:var(--accent2);text-decoration:none;">Download</a></td>
+        </tr>
+        <tr>
+          <td><div class="td-doc"><div class="td-doc-icon" style="background:var(--purple-light);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><span>Pedido de Exames</span></div></td>
+          <td>Ana Rodrigues</td><td>MCDT</td><td>25/05/2026</td>
+          <td><span class="td-status" style="background:var(--accent3);color:var(--accent);">Emitido</span></td>
+          <td><a href="#" style="font-size:.72rem;color:var(--accent2);text-decoration:none;">Download</a></td>
+        </tr>
+        <tr>
+          <td><div class="td-doc"><div class="td-doc-icon" style="background:#e0f5f0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a6b58" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><span>Relatório Clínico</span></div></td>
+          <td>Beatriz Santos</td><td>Relatório</td><td>24/05/2026</td>
+          <td><span class="td-status" style="background:var(--accent3);color:var(--accent);">Emitido</span></td>
+          <td><a href="#" style="font-size:.72rem;color:var(--accent2);text-decoration:none;">Download</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-brand">Had <strong>Clinic</strong> · Sistema de Gestão Clínica</div>
+  <div class="footer-links">
+    <a href="/suporte/index.htm">Suporte</a>
+    <a href="/privacidade.htm">Privacidade</a>
+    <a href="/termos.htm">Termos</a>
+    <a href="/ajuda/index.htm">Ajuda</a>
+  </div>
+</footer>
+
+<!-- MODAL EXEMPLO -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modalTitle">Confirmação</h3>
+    <p id="modalDesc">Tem a certeza que pretende continuar?</p>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="modal-ok" id="modalOk">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* data/hora */
+  (function () {
+    const el = document.getElementById('topDate');
+    function tick() {
+      const now = new Date();
+      el.textContent = now.toLocaleString('pt-PT', {
+        weekday: 'short', day: '2-digit', month: 'short',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+    tick(); setInterval(tick, 30000);
+  })();
+
+  /* stat consultas */
+  document.getElementById('statConsultas').textContent = '6';
+
+  /* pesquisa tabela */
+  document.getElementById('docSearch').addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#docBody tr').forEach(function (row) {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+
+  /* modal helpers */
+  function openModal(title, desc, cb) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalDesc').textContent  = desc;
+    document.getElementById('modalBg').classList.add('open');
+    document.getElementById('modalOk').onclick = function () { closeModal(); if (cb) cb(); };
+  }
+  function closeModal() {
+    document.getElementById('modalBg').classList.remove('open');
+  }
+  document.getElementById('modalBg').addEventListener('click', function (e) {
+    if (e.target === this) closeModal();
+  });
+  window.openModal  = openModal;
+  window.closeModal = closeModal;
+</script>
+
+</body>
+</html>
